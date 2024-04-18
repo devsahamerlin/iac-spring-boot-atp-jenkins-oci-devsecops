@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-tasksapp-app
+  labels:
+    app: spring-boot-tasksapp-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spring-boot-tasksapp-app
+  template:
+    metadata:
+      labels:
+        app: spring-boot-tasksapp-app
+    spec:
+      containers:
+        - name: spring-boot-tasksapp-app
+          image: devsahamerlin/tasksapp:2
+          ports:
+            - containerPort: 8082

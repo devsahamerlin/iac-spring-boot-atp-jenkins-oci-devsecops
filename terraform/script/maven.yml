@@ -1,0 +1,58 @@
+---
+- name: "Install Maven"
+  hosts: localhost
+  gather_facts: false
+  check_mode: false
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Install Java 11
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: "Create Maven group"
+      ansible.builtin.group:
+        name: maven
+        state: present
+
+    - name: "Create Maven User"
+      ansible.builtin.user:
+        name: maven
+        state: present
+
+    - name: "Create Maven Directory"
+      ansible.builtin.file:
+        path: /opt/maven
+        owner: maven
+        mode: 0755
+        recurse: yes
+
+    - name: "Download and unarchive maven"
+      ansible.builtin.unarchive:
+        src: https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
+        dest: /opt/maven
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+    
+    - name: "Change The Ownership Of maven Directory"
+      ansible.builtin.file:
+        path: /opt/maven
+        owner: maven
+        group: maven
+        mode: "u+rwx,g+rx,o=rx"
+        recurse: yes
+        state: directory
+
+    - name: Alternatives Maven link created
+      community.general.alternatives:
+        name: maven
+        link: /usr/bin/mvn
+        path: /opt/maven/bin/mvn
+        priority: 1001
+
+    - name: Istall Maven 
+      shell: update-alternatives --install /usr/bin/mvn maven /opt/maven//bin/mvn 1001
+
+    - name: Check Maven Version
+      shell: mvn -version
